@@ -25,5 +25,3 @@ with AnimeFLV() as api:
 
     except Exception as e:
         print(e)
-
-    
