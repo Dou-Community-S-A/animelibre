@@ -24,4 +24,4 @@ with AnimeFLV() as api:
             print(f"{link.server} - {link.url}")
 
     except Exception as e:
-        print(e)
+        print(e)       
