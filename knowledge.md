@@ -13,3 +13,9 @@
 * Se hizo un merge de la primera version del dev al main como copia de seguridad.
 * Se creo un test.py para hacer pruebas de diversas cosas.
 * Se creo knowledge.md para guardar los avances de la fecha.
+
+# Avances 28.07.2024
+
+* Se implemento selenium para hacer webscrapping al link de stape
+* Se cargo con vlc dicho video
+* Se espera a Facundo (LostDou) para implementacion de UI en tkinter.
