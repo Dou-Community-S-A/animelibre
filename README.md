@@ -50,7 +50,7 @@ $ python3 main.py
 
 ## Descargar
 
-Podes descargar [aca](WIP) el ultimo release del archivo.
+Podes descargar [aca](---) el ultimo release del archivo. (NO RELEASE YET)
 
 
 ## Creditos
