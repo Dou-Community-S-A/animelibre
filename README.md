@@ -1,7 +1,7 @@
 
 <h1 align="center">
   <br>
-  <a href="https://github.com/Dou-Community-S-A"><img src="https://imgur.com/a/rh6vP31" alt="Dou-Community" width="200"></a>
+  <a href="https://github.com/Dou-Community-S-A"><img src="https://i.imgur.com/eLhJL09.png" alt="Dou-Community" width="200"></a>
   <br>
   Anime Term
   <br>
