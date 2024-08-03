@@ -6,6 +6,10 @@ __pycache__/
 # C extensions
 *.so
 
+# dependencies
+yt-dlp.exe
+libmpv-2.dll
+
 # Distribution / packaging
 .Python
 build/

@@ -19,3 +19,9 @@
 * Se implemento selenium para hacer webscrapping al link de stape
 * Se cargo con vlc dicho video
 * Se espera a Facundo (LostDou) para implementacion de UI en tkinter.
+
+# Avances 03.08.2024
+
+* Se scrappeo todos los sitios web de animeflv
+* Se reproducen correctamente en mpv
+* Proximamente se investigara como hacer para integrarlo a un bot de discord. :)
