@@ -9,6 +9,7 @@ __pycache__/
 # dependencies
 yt-dlp.exe
 libmpv-2.dll
+test.py
 
 # Distribution / packaging
 .Python
