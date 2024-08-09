@@ -50,7 +50,7 @@ $ python3 main.py
 
 ## Descargar
 
-Podes descargar [aca](---) el ultimo release del archivo. (NO RELEASE YET)
+Podes descargar [aca](https://github.com/Dou-Community-S-A/animelibre/releases) el ultimo release del archivo.
 
 
 ## Creditos
