@@ -36,7 +36,7 @@ Para clonar esta repositorio, vas a necesitar [Git](https://git-scm.com) y [Pyth
 
 ```bash
 # Clone el repositorio.
-$ git clone https://github.com/Dou-Community-S-A/term-anime.git
+$ git clone https://github.com/Dou-Community-S-A/animelibre.git
 
 # Ir al repo
 $ cd term-anime
