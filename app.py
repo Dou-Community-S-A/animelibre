@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
 from tkinter.font import Font
+from ttkbootstrap import Style
 import os
 from scripts.anime_scrapper import AnimeFLV
 import os
@@ -10,6 +11,7 @@ from requests import get
 from PIL import Image, ImageTk
 from io import BytesIO
 import webbrowser
+import locale
 
 if os.name == "nt":
     if not os.path.exists(os.path.dirname(__file__) + "\\yt-dlp.exe"):
@@ -30,6 +32,8 @@ def callback(url):  # Funcion para abrir enlaces
         webbrowser.open_new_tab(url)
 
 import mpv
+
+locale.setlocale(locale.LC_NUMERIC, 'C')
 
 class AnimeApp:
     def __init__(self, root):
@@ -54,6 +58,8 @@ class AnimeApp:
         subtitle_label.pack(anchor="nw")
         subtitle_label.bind("<Button>", lambda event: callback("https://github.com/Dou-Community-S-A"))
 
+        style = Style(theme="darkly")  # Aplicar un tema oscuro
+
         # Frame de búsqueda
         search_frame = ttk.Frame(self.root)
         search_frame.pack(padx=10, pady=10)
@@ -75,7 +81,7 @@ class AnimeApp:
         results_frame = ttk.Frame(main_frame)
         results_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
-        self.results_listbox = tk.Listbox(results_frame, height=10)
+        self.results_listbox = tk.Listbox(results_frame, height=10, bg='black', fg='white')
         self.results_listbox.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
         self.results_listbox.bind('<<ListboxSelect>>', self.load_anime_info)
 
