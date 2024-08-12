@@ -8,7 +8,7 @@ import os
 import threading
 from zipfile import ZipFile
 from requests import get
-from PIL import Image, ImageTk
+from PIL import Image, ImageTk, ImageEnhance, ImageFilter
 from io import BytesIO
 import webbrowser
 import locale
@@ -19,7 +19,6 @@ if os.name == "nt":
         open(f'{os.path.dirname(__file__)}\\yt-dlp.exe', 'wb').write(get('https://raw.githubusercontent.com/agus-balles/files/main/yt-dlp.exe').content)
     
     if not os.path.exists(os.path.dirname(__file__) + "\\libmpv-2.dll"):
-        from zipfile import ZipFile
         print("Descargando Dependencia libmpv: ...")
         open(f'{os.path.dirname(__file__)}\\libmpv-2.zip', 'wb').write(get('https://raw.githubusercontent.com/agus-balles/files/main/libmpv-2.zip').content)
         print("Extrayendo depencia libmpv-2.dll: ...")
@@ -40,29 +39,38 @@ class AnimeApp:
         self.root = root
         self.root.title("Anime Libre v1.0")
         self.root.resizable(0, 0)
-        self.root.tk.call('tk', 'scaling', 1.25)
-        self.root.geometry('1024x768')
+        self.root.geometry('1024x800')
         self.root.iconbitmap(r'assets\mainicon.ico')
         self.api = AnimeFLV()
 
+        # Aplicar fondo
+        bg_image = Image.open(r"assets/background/background.jpg")
+        bg_image = bg_image.filter(ImageFilter.GaussianBlur(radius=6))
+        enhancer = ImageEnhance.Brightness(bg_image)
+        bg_image_darker = enhancer.enhance(0.5)
+        self.bg_photo = ImageTk.PhotoImage(bg_image_darker)
 
-
-        # Nombre de la app
-        header_frame = ttk.Frame(self.root)
-        header_frame.place(x=10, y=2) 
-        
-        title_label = ttk.Label(header_frame, text="Anime Libre", font=("Osaka-Sans Serif", 20))
-        title_label.pack(anchor="nw")
-        
-        subtitle_label = ttk.Label(header_frame, text="By Dou Community", foreground="#00a3ff" ,font=("Helvetica", 10))
-        subtitle_label.pack(anchor="nw")
-        subtitle_label.bind("<Button>", lambda event: callback("https://github.com/Dou-Community-S-A"))
+        canvas = tk.Canvas(self.root, width=1024, height=768)
+        canvas.pack(fill="both", expand=True)
+        canvas.create_image(0, 0, image=self.bg_photo, anchor="nw")
 
         style = Style(theme="darkly")  # Aplicar un tema oscuro
 
-        # Frame de búsqueda
+
+        ## ============== header_frame ======================
+        header_frame = ttk.Frame(self.root)
+        header_frame.place(x=10, y=10)
+
+        title_label = ttk.Label(header_frame, text="Anime Libre", font=("Osaka-Sans Serif", 20))
+        title_label.pack(anchor="nw")
+
+        subtitle_label = ttk.Label(header_frame, text="By Dou Community", foreground="#00a3ff", font=("Helvetica", 10), cursor="hand2")
+        subtitle_label.pack(anchor="nw")
+        subtitle_label.bind("<Button>", lambda event: callback("https://github.com/Dou-Community-S-A"))
+
+        ## ============== search_frame ======================
         search_frame = ttk.Frame(self.root)
-        search_frame.pack(padx=10, pady=10)
+        search_frame.place(x=200, y=20)
 
         search_label = ttk.Label(search_frame, text="Buscar Anime:")
         search_label.pack(side=tk.LEFT)
@@ -73,13 +81,13 @@ class AnimeApp:
         search_button = ttk.Button(search_frame, text="Buscar", command=self.search_anime)
         search_button.pack(side=tk.LEFT)
 
-        # Frame principal para resultados y portada
+        ## ============== main_frame ======================
         main_frame = ttk.Frame(self.root)
-        main_frame.pack(padx=10, pady=10, fill=tk.BOTH, expand=True)
+        main_frame.place(x=10, y=80, width=1004, height=320)
 
         # Lista de resultados de búsqueda y imagen de portada
         results_frame = ttk.Frame(main_frame)
-        results_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        results_frame.place(x=0, y=0, width=700, height=350)
 
         self.results_listbox = tk.Listbox(results_frame, height=10, bg='black', fg='white')
         self.results_listbox.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
@@ -91,17 +99,18 @@ class AnimeApp:
 
         # Frame para la imagen de portada
         cover_frame = ttk.Frame(main_frame)
-        cover_frame.pack(side=tk.LEFT, padx=10, fill=tk.Y, expand=False)
+        cover_frame.place(x=710, y=0, width=284, height=350)
 
         self.cover_label = ttk.Label(cover_frame)
-        self.cover_label.pack(side=tk.TOP, pady=10)
+        self.cover_label.pack(side=tk.TOP, pady=(10, 10))
 
-        # Información del anime y lista de episodios
+        ## ============== info_frame ======================
         info_frame = ttk.Frame(self.root)
-        info_frame.pack(padx=10, pady=10, fill=tk.BOTH, expand=True)
+        info_frame.place(x=10, y=410, width=1004, height=200)
 
         self.info_text = tk.Text(info_frame, height=10, wrap=tk.WORD)
         self.info_text.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        self.info_text.config(state=tk.DISABLED)
 
         self.episodes_listbox = tk.Listbox(info_frame, height=10)
         self.episodes_listbox.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
@@ -111,9 +120,9 @@ class AnimeApp:
         episodes_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
         self.episodes_listbox.config(yscrollcommand=episodes_scrollbar.set)
 
-        # Lista de enlaces del episodio
+        ## ============== links_frame ======================
         links_frame = ttk.Frame(self.root)
-        links_frame.pack(padx=10, pady=10, fill=tk.BOTH, expand=True)
+        links_frame.place(x=10, y=620, width=1004, height=130)
 
         self.links_listbox = tk.Listbox(links_frame, height=10)
         self.links_listbox.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
@@ -123,25 +132,17 @@ class AnimeApp:
         links_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
         self.links_listbox.config(yscrollcommand=links_scrollbar.set)
 
-        # Estilo personalizado para la barra de progreso
-        style = ttk.Style()
-        style.configure("custom.Horizontal.TProgressbar",
-                        troughcolor='lightgray',
-                        background='green',
-                        thickness=300)  # Cambia el grosor aquí
-
-        # Frame para la barra de progreso y el botón de reproducción
+        ## ============== play_button_frame ======================
         play_button_frame = ttk.Frame(self.root)
-        play_button_frame.pack(padx=10, pady=10, fill=tk.X, side=tk.BOTTOM)
+        play_button_frame.place(x=10, y=760, width=1004, height=30)
 
-        self.progress_bar = ttk.Progressbar(play_button_frame, style="custom.Horizontal.TProgressbar", mode='indeterminate')
+        self.progress_bar = ttk.Progressbar(play_button_frame, mode='indeterminate')
         self.progress_bar.pack(side=tk.LEFT, padx=10, fill=tk.X, expand=True)
 
         self.play_button = ttk.Button(play_button_frame, text="Play", command=self.play_selected_link)
         self.play_button.pack(side=tk.RIGHT)
         self.selected_link = None
 
-    
     def search_anime(self):
         query = self.search_entry.get().strip()
         if query:
@@ -159,6 +160,7 @@ class AnimeApp:
             anime_id = self.results_listbox.get(index)
             self.api.anime_info(anime_id)
             self.info_text.delete(1.0, tk.END)
+            self.info_text.config(state=tk.NORMAL)
             self.info_text.insert(tk.END, f"Título: {self.api.anime_title()}\n")
             self.info_text.insert(tk.END, f"Estado: {self.api.anime_status()}\n")
             self.info_text.insert(tk.END, f"Sinopsis: {self.api.anime_summary()}\n")
@@ -168,6 +170,7 @@ class AnimeApp:
             self.episodes_listbox.delete(0, tk.END)
             for i, episode in enumerate(self.api.anime_episodes(), 1):
                 self.episodes_listbox.insert(tk.END, f"Episodio {i}")
+            self.info_text.config(state=tk.DISABLED)
 
     def load_anime_cover(self, cover_url):
         if cover_url:
