@@ -39,13 +39,14 @@ Para clonar esta repositorio, vas a necesitar [Git](https://git-scm.com) y [Pyth
 $ git clone https://github.com/Dou-Community-S-A/animelibre.git
 
 # Ir al repo
-$ cd term-anime
+$ cd animelibre
 
 # Instalar dependencias
 $ pip install -r requirements.txt
 
 # Iniciar la app
 $ python3 main.py
+$ python3 app.py (GUI)
 ```
 
 ## Descargar
