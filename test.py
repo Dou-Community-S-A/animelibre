@@ -18,11 +18,11 @@ os.add_dll_directory(r'C:\Program Files\VideoLAN\VLC')
 if os.name == "nt":
     if not os.path.exists(os.path.dirname(__file__) + "\\yt-dlp.exe"):
         print("Descargando depencia yt-dlp: ...")
-        open(f'{os.path.dirname(__file__)}\\yt-dlp.exe', 'wb').write(get('https://raw.githubusercontent.com/agus-balles/files/main/yt-dlp.exe').content)
+        open(f'{os.path.dirname(__file__)}\\yt-dlp.exe', 'wb').write(get('https://raw.githubusercontent.com/matiasdante/files-4-animelibre/main/yt-dlp.exe').content)
     
     if not os.path.exists(os.path.dirname(__file__) + "\\libvlc.dll"):
         print("Downloading libvlc dependency: ...")
-        open(f'{os.path.dirname(__file__)}\\libvlc.zip', 'wb').write(get('https://raw.githubusercontent.com/agus-balles/files/main/libvlc.zip').content)
+        open(f'{os.path.dirname(__file__)}\\libvlc.zip', 'wb').write(get('https://raw.githubusercontent.com/matiasdante/files-4-animelibre/main/libvlc.zip').content)
         print("Extracting libvlc.dll dependency: ...")
         ZipFile(f"{os.path.dirname(__file__)}\\libvlc.zip", "r").extractall(os.path.dirname(__file__))
         os.remove(f"{os.path.dirname(__file__)}\\libvlc.zip")
@@ -44,10 +44,22 @@ class AnimeApp:
         self.root.geometry('1024x800')
         self.root.iconbitmap(r'assets\mainicon.ico')
         self.api = AnimeFLV()
-
+        self.setup_hidden_folder()
         self.widgets = []  # Lista para almacenar widgets
         self.set_background() # aplica el fondo
         self.mainmenu() # llama al menu principal
+
+    def setup_hidden_folder(self):
+        """Crea una carpeta oculta para almacenar temporalmente el video."""
+        self.hidden_dir = os.path.join(os.path.dirname(__file__), ".anime_temp")
+        if not os.path.exists(self.hidden_dir):
+            os.makedirs(self.hidden_dir)
+            os.system(f'attrib +h "{self.hidden_dir}"')
+        else:
+            # Elimina el archivo de video temporal si existe
+            temp_file = os.path.join(self.hidden_dir, "temp_video.mp4")
+            if os.path.exists(temp_file):
+                os.remove(temp_file)
 
     def set_background(self): # Aplicar fondos de pantalla
         bg_image = Image.open(r"assets/background/background.jpg")
@@ -262,25 +274,24 @@ class AnimeApp:
 
     def watch_video(self, video_src):
         try:
-            temp_dir = os.path.dirname(__file__) 
-            temp_file = os.path.join(temp_dir, "temp_video.mp4") 
+            temp_file = os.path.join(self.hidden_dir, "temp_video.mp4")
 
-            if not os.path.exists(temp_dir):
-                os.makedirs(temp_dir)
+            print(f"Descargando video a {temp_file}...")
+            result = subprocess.run(["yt-dlp", "-o", temp_file, video_src], check=True)
 
-            subprocess.call(["yt-dlp", "-o", temp_file, video_src]) 
-
-            media = vlc.MediaPlayer(temp_file) 
-            media.play()
-            while media.is_playing():
-                pass  
-
-            os.remove(temp_file) 
-
+            if result.returncode == 0 and os.path.exists(temp_file):
+                print(f"Reproduciendo video desde {temp_file}...")
+                os.open(temp_file.mp4)
+                while temp_file.is_playing():
+                    pass
+                print("Reproducción completada.")
+            else:
+                raise Exception("Error en la descarga o archivo no encontrado.")
         except Exception as e:
             messagebox.showerror("Error", f"No se pudo reproducir el video: {e}")
         finally:
-            self.progress_bar.stop() 
+            self.progress_bar.stop()
+
 
     def create_player(self):
         pass 
