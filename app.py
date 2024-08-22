@@ -317,7 +317,6 @@ class AnimeApp:
                 self.links_listbox.insert(tk.END, link)
 
     def on_play_button_clicked(self): # Deteccion del boton play para reproducir el episodio
-        self.progress_bar.start()
         if self.selected_link:
             if self.player_option == "mpv": # Eleccion entre mpv o default
                 self.play_with_mpv(self.selected_link)
@@ -336,7 +335,6 @@ class AnimeApp:
         player = mpv.MPV(ytdl=True, input_default_bindings=True, osc=True)
         player.play(link)
     
-
     '''
     # Posible fix a futuro (Error al cerrar MPV de forma forzada)
     def cerrar_aplicacion(): # Consulta para confirmar cierre aplicacion
