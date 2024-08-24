@@ -39,6 +39,8 @@ def callback(url):  # Función para abrir enlaces
 locale.setlocale(locale.LC_NUMERIC, 'C')
 
 class AnimeApp:
+    # =========== Setear ventana principal =================
+
     def __init__(self, root):  # Crear ventana principal
         self.root = root
         self.root.title("Anime Libre v1.1")
@@ -56,17 +58,6 @@ class AnimeApp:
         self.clear_temp_folder()
         self.set_background()
         self.mainmenu()
-    
-    def clear_temp_folder(self): # Limpia la carpeta .temp
-        temp_folder = os.path.join(os.path.dirname(__file__), '.temp')
-        if os.path.exists(temp_folder):
-            for file_name in os.listdir(temp_folder):
-                file_path = os.path.join(temp_folder, file_name)
-                try:
-                    if os.path.isfile(file_path):
-                        os.remove(file_path)
-                except Exception as e:
-                    print(f"Error al eliminar el archivo {file_path}: {e}")
 
     def set_background(self):  # Aplicar fondos de pantalla
         bg_image = Image.open(r"assets/background/background.jpg")
@@ -92,8 +83,9 @@ class AnimeApp:
         header_frame.place(x=10, y=10)
         self.widgets.append(header_frame)
 
-        title_label = ttk.Label(header_frame, text="Anime Libre", font=("Osaka-Sans Serif", 20))
+        title_label = ttk.Label(header_frame, text="Anime Libre", font=("Osaka-Sans Serif", 20), cursor="hand2")
         title_label.pack(anchor="nw")
+        title_label.bind("<Button>", lambda event: self.mainmenu())
         self.widgets.append(title_label)
 
         subtitle_label = ttk.Label(header_frame, text="By Dou Community", foreground="#00a3ff", font=("Helvetica", 10), cursor="hand2")
@@ -101,15 +93,44 @@ class AnimeApp:
         subtitle_label.bind("<Button>", lambda event: callback("https://github.com/Dou-Community-S-A"))
         self.widgets.append(subtitle_label)
 
-        mainmenu_button = ttk.Button(self.root, text="Menu Principal", cursor="hand2", command=self.mainmenu)
-        mainmenu_button.place(x=800, y=20)
-        self.widgets.append(mainmenu_button)
+        searchmenu_button = ttk.Button(self.root, text="Buscador", cursor="hand2", command=self.searchmenu)
+        searchmenu_button.place(x=825, y=20)
+        self.widgets.append(searchmenu_button)
 
         optionsmenu_button = ttk.Button(self.root, text="Opciones", cursor="hand2", command=self.optionsmenu)
         optionsmenu_button.place(x=910, y=20)
         self.widgets.append(optionsmenu_button)
 
-    def mainmenu(self): # Menu principal (Busqueda de anime)
+    # =================== Menús ===========================
+
+    def mainmenu(self):
+        self.clear_widgets()
+        self.global_widgets()
+
+        title_label = ttk.Label(self.root, text="Anime Libre v1.1", font=("Helvetica", 25))
+        title_label.place(x=10, y=80)
+        self.widgets.append(title_label)
+
+        date_label = ttk.Label(self.root, text="23/08/24", font=("Helvetica", 15))
+        date_label.place(x=275, y=85)
+        self.widgets.append(date_label)
+
+        changelog_text = tk.Text(self.root, height=10, width=150, wrap=tk.WORD)
+        changelog_text.place(x=10, y=150)
+        changelog_text.tag_configure("changelog", font=("Arial", 13))
+        changelog = ("CHANGE LOG:\n"
+        "* Fondo e interfaz mejoradas (dentro de lo posible)\n"
+        "* 2 nuevos menús: Menú principal (este mismo) y Opciones\n"
+        "* Ahora puedes elegir si usar el reproductor integrado con la app o el reproductor predeterminado de tu PC. Esto en el menu de opciones."
+        )
+        changelog_text.insert(tk.END, changelog, "changelog")
+        changelog_text.config(state=tk.DISABLED)
+        self.widgets.append(changelog_text)
+        
+
+        
+
+    def searchmenu(self): # Menu del buscador (Busqueda de anime)
         self.clear_widgets()
         self.global_widgets()
 
@@ -255,10 +276,23 @@ class AnimeApp:
         save_button.pack(side=tk.LEFT, padx=10)
         self.widgets.append(save_button)
 
+    # =================== Funciones =======================
+
     def save_player_option(self): # Guarda el reproductor elegido por el usuario
         self.player_option = self.player_var.get()
         srp.save_selected_player(self.player_option)
         messagebox.showinfo("Información", "Opción de reproductor guardada con éxito.")
+
+    def clear_temp_folder(self): # Limpia la carpeta .temp
+        temp_folder = os.path.join(os.path.dirname(__file__), '.temp')
+        if os.path.exists(temp_folder):
+            for file_name in os.listdir(temp_folder):
+                file_path = os.path.join(temp_folder, file_name)
+                try:
+                    if os.path.isfile(file_path):
+                        os.remove(file_path)
+                except Exception as e:
+                    print(f"Error al eliminar el archivo {file_path}: {e}")
 
     def search_anime(self): # Buscar el Anime elegido por el usuario
         query = self.search_entry.get().strip()
