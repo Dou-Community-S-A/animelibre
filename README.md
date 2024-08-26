@@ -3,7 +3,7 @@
   <br>
   <a href="https://github.com/Dou-Community-S-A"><img src="https://i.imgur.com/eLhJL09.png" alt="Dou-Community" width="200"></a>
   <br>
-  Anime Term
+  AnimeLibre
   <br>
 </h1>
 
@@ -36,21 +36,22 @@ Para clonar esta repositorio, vas a necesitar [Git](https://git-scm.com) y [Pyth
 
 ```bash
 # Clone el repositorio.
-$ git clone https://github.com/Dou-Community-S-A/term-anime.git
+$ git clone https://github.com/Dou-Community-S-A/animelibre.git
 
 # Ir al repo
-$ cd term-anime
+$ cd animelibre
 
 # Instalar dependencias
 $ pip install -r requirements.txt
 
 # Iniciar la app
 $ python3 main.py
+$ python3 app.py (GUI)
 ```
 
 ## Descargar
 
-Podes descargar [aca](---) el ultimo release del archivo. (NO RELEASE YET)
+Podes descargar [aca](https://github.com/Dou-Community-S-A/animelibre/releases) el ultimo release del archivo.
 
 
 ## Creditos
