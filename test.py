@@ -5,7 +5,7 @@ from ttkbootstrap import Style
 from PIL import Image, ImageTk, ImageEnhance, ImageFilter
 import os
 from scripts.anime_scrapper import AnimeFLV
-import scripts.app_config as cfg  
+import scripts.selected_rp as srp  
 import threading
 from zipfile import ZipFile
 from requests import get
@@ -14,8 +14,6 @@ import webbrowser
 import locale
 import subprocess
 import sys
-import ctypes
-import textwrap
 
 
 if os.name == "nt":
@@ -35,13 +33,13 @@ if os.name == "nt":
 
 import mpv
 
+
 def callback(url):  # Función para abrir enlaces
     webbrowser.open_new_tab(url)
 
 locale.setlocale(locale.LC_NUMERIC, 'C')
 
 class AnimeApp:
-    # =========== Setear ventana principal =================
     def __init__(self, root):  # Crear ventana principal
         self.root = root
         self.root.title("Anime Libre v1.1")
@@ -49,21 +47,27 @@ class AnimeApp:
         self.root.geometry('1024x800')
         self.root.iconbitmap(r'assets\mainicon.ico')
         self.api = AnimeFLV()
-        self.player_option = cfg.get_selected_player()  # Cargar opción de reproductor seleccionada
+        self.player_option = srp.get_selected_player()  # Cargar opción de reproductor seleccionada
         self.widgets = []  # Lista para almacenar widgets
         
-        # Almacenar la búsqueda y los resultados
-        self.search_query = ""
+        self.search_query = "" # Almacenar la búsqueda y los resultados
         self.search_results = []
         self.selected_anime_info = None
-        # Almacenar el link, anime y episodio seleccionado para despues guardarlo
-        self.selected_link = None
-        self.current_anime_id = None
-        self.current_episode_number = None
 
         self.clear_temp_folder()
         self.set_background()
         self.mainmenu()
+    
+    def clear_temp_folder(self): # Limpia la carpeta .temp
+        temp_folder = os.path.join(os.path.dirname(__file__), '.temp')
+        if os.path.exists(temp_folder):
+            for file_name in os.listdir(temp_folder):
+                file_path = os.path.join(temp_folder, file_name)
+                try:
+                    if os.path.isfile(file_path):
+                        os.remove(file_path)
+                except Exception as e:
+                    print(f"Error al eliminar el archivo {file_path}: {e}")
 
     def set_background(self):  # Aplicar fondos de pantalla
         bg_image = Image.open(r"assets/background/background.jpg")
@@ -89,9 +93,8 @@ class AnimeApp:
         header_frame.place(x=10, y=10)
         self.widgets.append(header_frame)
 
-        title_label = ttk.Label(header_frame, text="Anime Libre", font=("Osaka-Sans Serif", 20), cursor="hand2")
+        title_label = ttk.Label(header_frame, text="Anime Libre", font=("Osaka-Sans Serif", 20))
         title_label.pack(anchor="nw")
-        title_label.bind("<Button>", lambda event: self.mainmenu())
         self.widgets.append(title_label)
 
         subtitle_label = ttk.Label(header_frame, text="By Dou Community", foreground="#00a3ff", font=("Helvetica", 10), cursor="hand2")
@@ -99,48 +102,15 @@ class AnimeApp:
         subtitle_label.bind("<Button>", lambda event: callback("https://github.com/Dou-Community-S-A"))
         self.widgets.append(subtitle_label)
 
-        searchmenu_button = ttk.Button(self.root, text="Buscador", cursor="hand2", command=self.searchmenu)
-        searchmenu_button.place(x=725, y=20)
-        self.widgets.append(searchmenu_button)
-
-        recentmenu_button = ttk.Button(self.root, text="Animes vistos", cursor="hand2", command=self.recentmenu)
-        recentmenu_button.place(x=810, y=20)
-        self.widgets.append(recentmenu_button)
+        mainmenu_button = ttk.Button(self.root, text="Menu Principal", cursor="hand2", command=self.mainmenu)
+        mainmenu_button.place(x=800, y=20)
+        self.widgets.append(mainmenu_button)
 
         optionsmenu_button = ttk.Button(self.root, text="Opciones", cursor="hand2", command=self.optionsmenu)
-        optionsmenu_button.place(x=920, y=20)
+        optionsmenu_button.place(x=910, y=20)
         self.widgets.append(optionsmenu_button)
-    
 
-    # =================== Menús ===========================
-
-    def mainmenu(self): # Menú principal (Changelog)
-        self.clear_widgets()
-        self.global_widgets()
-
-        title_label = ttk.Label(self.root, text="Anime Libre v1.1 (Pre-Release)", font=("Helvetica", 25))
-        title_label.place(x=10, y=80)
-        self.widgets.append(title_label)
-
-        date_label = ttk.Label(self.root, text="26/08/24", font=("Helvetica", 15))
-        date_label.place(x=480, y=88)
-        self.widgets.append(date_label)
-
-        changelog_text = tk.Text(self.root, height=10, width=150, wrap=tk.WORD)
-        changelog_text.place(x=10, y=150)
-        changelog_text.tag_configure("changelog", font=("Arial", 13))
-        changelog = ("CHANGE LOG:\n"
-        "* Fondo e interfaz mejoradas (dentro de lo posible)\n"
-        "* 3 nuevos menús: Menú principal (este mismo), Animes vistos y Opciones\n"
-        "* Ahora se guardan los animes que viste, a futuro desde ahi podras acceder a ellos directamente\n"
-        "* Ahora puedes elegir si usar el reproductor integrado con la app o el reproductor predeterminado de tu PC. Esto en el menu de opciones.\n"
-        "* Ahora los resultados se muestran sin guiones :3\n"        
-        )
-        changelog_text.insert(tk.END, changelog, "changelog")
-        changelog_text.config(state=tk.DISABLED)
-        self.widgets.append(changelog_text)
-        
-    def searchmenu(self): # Menú del buscador (Busqueda de anime)
+    def mainmenu(self): # Menu principal (Busqueda de anime)
         self.clear_widgets()
         self.global_widgets()
 
@@ -225,8 +195,6 @@ class AnimeApp:
         self.links_listbox.config(yscrollcommand=links_scrollbar.set)
         self.widgets.append(links_scrollbar)
 
-        '''
-        comentado para evitar errores al volver al buscador
         ## ========= recuperar busqueda (si hay)===========
         if self.search_query:
             self.search_entry.insert(0, self.search_query)
@@ -238,16 +206,14 @@ class AnimeApp:
                 self.info_text.config(state=tk.NORMAL)
                 self.info_text.delete(1.0, tk.END)
                 self.info_text.insert(tk.END, f"Título: {self.selected_anime_info['title']}\n")
-                self.info_text.insert(tk.END, "\n")
                 self.info_text.insert(tk.END, f"Estado: {self.selected_anime_info['status']}\n")
-                self.info_text.insert(tk.END, "\n")
                 self.info_text.insert(tk.END, f"Sinopsis: {self.selected_anime_info['summary']}\n")
                 self.load_anime_cover(self.selected_anime_info['cover'])
                 self.episodes_listbox.delete(0, tk.END)
                 for i, episode in enumerate(self.selected_anime_info['episodes'], 1):
                     self.episodes_listbox.insert(tk.END, f"Episodio {i}")
                 self.info_text.config(state=tk.DISABLED)
-        '''
+
 
         ## ============== play_button_frame ======================
         play_button_frame = ttk.Frame(self.root)
@@ -259,85 +225,12 @@ class AnimeApp:
         self.widgets.append(self.play_button)
         self.selected_link = None
 
-    def recentmenu(self): # Menú de animes recientes (muestra una lista de cuantos usaste)
-        self.clear_widgets()  # Limpia los widgets existentes
-        self.global_widgets()  # Vuelve a cargar los widgets globales
-
-        # Crear un frame para contener el canvas y la scrollbar
-        container = ttk.Frame(self.root)
-        container.pack(fill=tk.BOTH, expand=True)
-
-        # Etiqueta para el menú de animes vistos
-        watched_label = ttk.Label(self.root, text="Animes vistos:", font=("Helvetica", 16))
-        watched_label.place(x=10, y=80)
-        self.widgets.append(watched_label)
-
-        x_position = 10  # Posición inicial para colocar los widgets en la fila
-        y_position = 130  # Posición vertical inicial en el frame
-        max_columns = 6   # Número máximo de columnas
-        column_width = 150  # Ancho de cada imagen
-        row_height = 250  # Altura de cada fila (imagen + espacio para el título)
-
-        # Obtener la lista de animes vistos
-        data = cfg.load_config()
-        watched_animes = data.get('visto', {})
-
-        # Añadir animes al frame
-        for index, (anime_id, episodes) in enumerate(watched_animes.items()):
-            # Obtener la información del anim
-            self.api.anime_info(anime_id)
-            self.anime_info = {
-                "title": self.api.anime_title(),
-                "cover": self.api.anime_cover()
-            }
-
-            if self.anime_info['cover']:
-                # Obtener y procesar la imagen de portada
-                response = get(self.anime_info['cover'])
-                image_data = response.content
-                image = Image.open(BytesIO(image_data))
-                image = image.resize((150, 200), Image.Resampling.LANCZOS)  # Ajusta el tamaño según sea necesario
-                photo = ImageTk.PhotoImage(image)
-            else:
-                photo = None
-
-            # Etiqueta para la portada
-            cover_label = ttk.Label(self.root, image=photo)
-            cover_label.place(x=x_position, y=y_position)
-            self.widgets.append(cover_label)
-
-            # Etiqueta para el nombre del anime
-            wrapped_title = '\n'.join(textwrap.wrap(self.anime_info['title'], width=17)) # Hace un salto de linea en caso de llegar a mas de 17 caracteres
-            title_label = ttk.Label(self.root, text=wrapped_title, font=("Helvetica", 10))
-            title_label.place(x=x_position, y=y_position + 210)  # Ajusta la posición según sea necesario
-            self.widgets.append(title_label)
-
-            # Actualizar la posición para la próxima imagen
-            x_position += column_width + 10  # Añadir un margen de 10 píxeles entre columnas
-
-            # Cambiar de fila después de tres columnas
-            if (index + 1) % max_columns == 0:
-                x_position = 10  # Reiniciar posición horizontal
-                y_position += row_height  # Mover hacia abajo para la siguiente fila
-
-            # Mantener una referencia a la imagen para evitar la recolección de basura
-            if photo:
-                cover_label.image = photo
-
-
-        # Configurar el frame en el contenedor principal para expandirse
-        container.pack_propagate(False)
-        container.update_idletasks()
-
-        # Asegurarse de que el contenedor se expanda para llenar la ventana
-        self.root.update_idletasks()
-
     def optionsmenu(self):  # Menú de configuraciones (Selector de reproductor)
         self.clear_widgets()
         self.global_widgets()
 
-        options_label = ttk.Label(self.root, text="Opciones:", font=("Helvetica", 16))
-        options_label.place(x=10, y=80)
+        options_label = ttk.Label(self.root, text="Opciones", font=("Helvetica", 16))
+        options_label.place(x=200, y=80)
         self.widgets.append(options_label)
 
         # Selector de reproductor
@@ -363,23 +256,10 @@ class AnimeApp:
         save_button.pack(side=tk.LEFT, padx=10)
         self.widgets.append(save_button)
 
-    # =================== Funciones =======================
-
     def save_player_option(self): # Guarda el reproductor elegido por el usuario
         self.player_option = self.player_var.get()
-        cfg.save_selected_player(self.player_option)
+        srp.save_selected_player(self.player_option)
         messagebox.showinfo("Información", "Opción de reproductor guardada con éxito.")
-
-    def clear_temp_folder(self): # Limpia la carpeta .temp
-        temp_folder = os.path.join(os.path.dirname(__file__), '.temp')
-        if os.path.exists(temp_folder):
-            for file_name in os.listdir(temp_folder):
-                file_path = os.path.join(temp_folder, file_name)
-                try:
-                    if os.path.isfile(file_path):
-                        os.remove(file_path)
-                except Exception as e:
-                    print(f"Error al eliminar el archivo {file_path}: {e}")
 
     def search_anime(self): # Buscar el Anime elegido por el usuario
         query = self.search_entry.get().strip()
@@ -387,44 +267,34 @@ class AnimeApp:
             self.search_query = query  # Guardar la búsqueda actual
             self.results_listbox.delete(0, tk.END)
             self.search_results = self.api.search(query)  # Guardar los resultados de búsqueda
-            self.anime_dict = {} # Creamos un diccionario para despues mostrar los resultados sin guion
-            self.mod_results = [result.replace("-", " ") for result in self.search_results] 
-            for original, modified in zip(self.search_results, self.mod_results):
-                self.anime_dict[modified] = original
-                self.results_listbox.insert(tk.END, modified)
+            for result in self.search_results:
+                self.results_listbox.insert(tk.END, result)
         else:
             messagebox.showwarning("Advertencia", "Ingrese un título de anime para buscar.")
 
-    def load_anime_info(self, event): # Carga la informacion del anime elegido
+    def load_anime_info(self, event): # Cargar la info del anime elegido
         selection = self.results_listbox.curselection()
         if selection:
             index = selection[0]
-            modified_name = self.results_listbox.get(index) # Conseguimos el nombre con guiones del diccionario creado anteriormente
-            original_name = self.anime_dict.get(modified_name)
-            if original_name:
-                anime_id = original_name
-                self.current_anime_id = anime_id
-                self.api.anime_info(anime_id)
-                self.selected_anime_info = {
-                    "title": self.api.anime_title(),
-                    "status": self.api.anime_status(),
-                    "summary": self.api.anime_summary(),
-                    "cover": self.api.anime_cover(),
-                    "episodes": self.api.anime_episodes(),
-                                    }
-
-        self.info_text.config(state=tk.NORMAL)
-        self.info_text.delete(1.0, tk.END)
-        self.info_text.insert(tk.END, f"Título: {self.selected_anime_info['title']}\n")
-        self.info_text.insert(tk.END, "\n")
-        self.info_text.insert(tk.END, f"Estado: {self.selected_anime_info['status']}\n")
-        self.info_text.insert(tk.END, "\n")
-        self.info_text.insert(tk.END, f"Sinopsis: {self.selected_anime_info['summary']}\n")
-        self.load_anime_cover(self.selected_anime_info['cover'])
-        self.episodes_listbox.delete(0, tk.END)
-        for i, episode in enumerate(self.selected_anime_info['episodes'], 1): # Carga lista de Episodios
-            self.episodes_listbox.insert(tk.END, f"Episodio {i}")
-        self.info_text.config(state=tk.DISABLED)
+            anime_id = self.results_listbox.get(index)
+            self.api.anime_info(anime_id)
+            self.selected_anime_info = {
+                "title": self.api.anime_title(),
+                "status": self.api.anime_status(),
+                "summary": self.api.anime_summary(),
+                "cover": self.api.anime_cover(),
+                "episodes": self.api.anime_episodes(),
+            }
+            self.info_text.config(state=tk.NORMAL)
+            self.info_text.delete(1.0, tk.END)
+            self.info_text.insert(tk.END, f"Título: {self.selected_anime_info['title']}\n")
+            self.info_text.insert(tk.END, f"Estado: {self.selected_anime_info['status']}\n")
+            self.info_text.insert(tk.END, f"Sinopsis: {self.selected_anime_info['summary']}\n")
+            self.load_anime_cover(self.selected_anime_info['cover'])
+            self.episodes_listbox.delete(0, tk.END)
+            for i, episode in enumerate(self.selected_anime_info['episodes'], 1): # Carga lista de Episodios
+                self.episodes_listbox.insert(tk.END, f"Episodio {i}")
+            self.info_text.config(state=tk.DISABLED)
 
     def load_anime_cover(self, cover_url): # Cargar la portada del anime elegido
         if cover_url:
@@ -442,13 +312,13 @@ class AnimeApp:
         selection = self.episodes_listbox.curselection()
         if selection:
             episode_index = selection[0]
-            self.current_episode_number = episode_index + 1
             links = self.api.get_links(episode_index + 1)
             self.links_listbox.delete(0, tk.END)
             for link in links: # Inserta los links en el recuadro de la interfaz
                 self.links_listbox.insert(tk.END, link)
 
     def on_play_button_clicked(self): # Deteccion del boton play para reproducir el episodio
+        self.progress_bar.start()
         if self.selected_link:
             if self.player_option == "mpv": # Eleccion entre mpv o default
                 self.play_with_mpv(self.selected_link)
@@ -466,9 +336,8 @@ class AnimeApp:
     def play_with_mpv(self, link): # Reproducir con MPV
         player = mpv.MPV(ytdl=True, input_default_bindings=True, osc=True)
         player.play(link)
-        print(self.current_anime_id)
-        cfg.mark_as_seen(self.current_anime_id, self.current_episode_number)
     
+
     '''
     # Posible fix a futuro (Error al cerrar MPV de forma forzada)
     def cerrar_aplicacion(): # Consulta para confirmar cierre aplicacion
@@ -486,13 +355,7 @@ class AnimeApp:
 
     def play_with_default(self, link): # Reproducir con el reproductor predeterminado del sistema (VLC, WMP, etc.)
         temp_folder = os.path.join(os.path.dirname(__file__), '.temp')
-    
-    # Crear la carpeta .temp si no existe y establecer el atributo de oculto
-        if not os.path.exists(temp_folder):
-            os.makedirs(temp_folder)
-            # Establecer el atributo de oculto
-            if os.name == 'nt': 
-                ctypes.windll.kernel32.SetFileAttributesW(temp_folder, 2)
+        os.makedirs(temp_folder)
 
         # Contar el número de archivos existentes en la carpeta para determinar el siguiente índice
         existing_files = [f for f in os.listdir(temp_folder) if f.startswith('temp_video') and f.endswith('.mp4')]
@@ -508,7 +371,6 @@ class AnimeApp:
         video_file = os.path.join(temp_folder, video_filename)
         subprocess.run(['yt-dlp', '-o', video_file, link]) # Descargar el video utilizando yt-dlp
         subprocess.run(['start', '', video_file], shell=True) # Reproducir el video con el reproductor predeterminado
-        cfg.mark_as_seen(self.current_anime_id, self.current_episode_number)
     
 
 if __name__ == "__main__":

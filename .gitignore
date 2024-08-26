@@ -3,13 +3,20 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# Folders
+.vs
+venv
+.temp
+
 # C extensions
 *.so
 
 # dependencies
 yt-dlp.exe
 libmpv-2.dll
-test.py
+libvlc.dll
+scripts/app_config.json
+
 
 # Distribution / packaging
 .Python
